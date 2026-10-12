@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tokyo-area in-store proxy for store-only and pop-up exclusive anime, character and VTuber goods. Retail price, receipt photo every time.">
+<meta property="og:title" content="Mahhy's Pop-up Runner">
+<meta property="og:description" content="Store-only and pop-up exclusive goods from Tokyo, bought at retail price for fans overseas.">
+<meta property="og:type" content="website">
+<title>Mahhy's Pop-up Runner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single column read like a shop order slip — sticker-style headings, receipt-style price rows */
+:root {
+  --bg: #f4f5f8;
+  --paper: #ffffff;
+  --ink: #1a2133;
+  --muted: #5b6377;
+  --line: #d9dce5;
+  --accent: #d1336a;
+  --accent-ink: #ffffff;
+  --soft: #fbe7ef;
+  --warn: #8a5a00;
+  --warn-bg: #fff4dc;
+  --f-display: "Dela Gothic One", "Hiragino Kaku Gothic ProN", "Arial Black", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151d; --paper: #1b2030; --ink: #eceef4; --muted: #a2a9bb; --line: #2e3446;
+    --accent: #ff5c93; --accent-ink: #1a0b12; --soft: #3a1a28; --warn: #ffcf73; --warn-bg: #33270f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151d; --paper: #1b2030; --ink: #eceef4; --muted: #a2a9bb; --line: #2e3446;
+  --accent: #ff5c93; --accent-ink: #1a0b12; --soft: #3a1a28; --warn: #ffcf73; --warn-bg: #33270f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: flex; flex-direction: column; gap: 40px; }
+h1, h2 { font-family: var(--f-display); font-weight: 400; line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 7vw, 3.2rem); }
+h2 { font-size: 1.5rem; display: inline-block; background: var(--accent); color: var(--accent-ink); padding: 4px 12px 6px; transform: rotate(-1.2deg); }
+h3 { font-size: 1.05rem; margin: 0; }
+p { margin: 0; }
+.eyebrow { font-family: var(--f-mono); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.lead { font-size: 1.12rem; color: var(--muted); max-width: 60ch; }
+header { display: flex; flex-direction: column; gap: 14px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge { font-size: .85rem; border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px 12px; font-weight: 500; }
+section { display: flex; flex-direction: column; gap: 18px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2.2rem 1fr; gap: 12px; align-items: start; }
+.steps li::before { content: counter(s); font-family: var(--f-display); font-size: 1.3rem; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--soft); color: var(--accent); display: grid; place-items: center; }
+.steps p { color: var(--muted); font-size: .95rem; }
+.slip { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 4px 16px; padding-block: 10px; border-bottom: 1px dashed var(--line); }
+.row:last-child { border-bottom: 0; }
+.row > div { min-width: 0; }
+.price .sub { display: block; font-size: .78rem; font-weight: 400; color: var(--muted); white-space: normal; }
+@media (max-width: 420px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .price { text-align: left; color: var(--accent); }
+}
+.row .what { font-weight: 600; }
+.row .note { color: var(--muted); font-size: .88rem; }
+.price { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; font-weight: 500; }
+.callout { background: var(--soft); border-radius: 6px; padding: 14px 16px; font-size: .95rem; }
+.callout.warn { background: var(--warn-bg); color: var(--ink); }
+.callout strong { color: var(--accent); }
+.callout.warn strong { color: var(--warn); }
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: .92rem; }
+th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; vertical-align: bottom; }
+tbody td { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: 0; }
+.na { color: var(--muted); font-family: var(--f-body); font-size: .85rem; }
+.small { font-size: .85rem; color: var(--muted); }
+.rules { display: grid; gap: 10px; }
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0 16px; }
+summary { cursor: pointer; padding-block: 14px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-family: var(--f-mono); color: var(--accent); }
+details[open] summary::after { content: "–"; }
+summary:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details ul { margin: 0 0 14px; padding-left: 1.2rem; display: grid; gap: 6px; color: var(--muted); }
+details li strong { color: var(--ink); }
+.nope { display: flex; flex-wrap: wrap; gap: 8px; }
+.nope span { border: 1px solid var(--line); background: var(--paper); border-radius: 4px; padding: 4px 10px; font-size: .9rem; text-decoration: line-through; text-decoration-color: var(--accent); }
+.template { position: relative; }
+.template pre { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 16px; font-family: var(--f-mono); font-size: .88rem; white-space: pre-wrap; overflow-x: auto; }
+.copy { align-self: flex-start; font: 600 .95rem var(--f-body); background: var(--ink); color: var(--bg); border: 0; border-radius: 999px; padding: 10px 20px; cursor: pointer; }
+.copy:hover { background: var(--accent); color: var(--accent-ink); }
+footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 6px; }
+footer a { color: var(--accent); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { h2 { transform: none; } }
+body { margin: 0; }
+img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap"><header>
+    <span class="eyebrow">Mahhy's Pop-up Runner · Tokyo &amp; Yokohama</span>
+    <h1>You know what you want. Mahhy will go get it.</h1>
+    <p class="lead">I buy store-only and pop-up exclusive anime, character and VTuber goods in the Tokyo area for fans overseas. Items are bought at the shelf price, and you see the receipt.</p>
+    <div class="badges">
+      <span class="badge">Retail price, no markup</span>
+      <span class="badge">Receipt photo every time</span>
+      <span class="badge">Weekly shopping runs</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><div><h3>Send your request</h3><p>Item name, a photo or link, the shop or pop-up, and quantity. Use the template at the bottom.</p></div></li>
+      <li><div><h3>Get a quote and agree to the terms</h3><p>I check availability and purchase rules, then send a quote.</p></div></li>
+      <li><div><h3>Payment 1: item + buying fee</h3><p>Paid before the shopping run. Your order is confirmed once this arrives.</p></div></li>
+      <li><div><h3>I buy it on the next shopping run</h3><p>Runs happen on a fixed day each week. You get photos of the item and receipt.</p></div></li>
+      <li><div><h3>Payment 2: packing + shipping</h3><p>I pack and weigh your parcel, then send the exact shipping cost.</p></div></li>
+      <li><div><h3>Shipped with tracking</h3><p>You receive the tracking number and packing photos.</p></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Fees</h2>
+    <div class="slip">
+      <div class="row"><div><div class="what">Item price</div><div class="note">Exactly what the shop charges, shown on the receipt</div></div><div class="price">at cost</div></div>
+      <div class="row"><div><div class="what">Buying fee</div><div class="note">Per shop, per request. Several items from the same shop count as one.</div></div><div class="price">¥3,000<span class="sub">or 10%, if higher</span></div></div>
+      <div class="row"><div><div class="what">Train fare</div><div class="note">Split between everyone with a request on the same run</div></div><div class="price">at cost</div></div>
+      <div class="row"><div><div class="what">Queue time</div><div class="note">Only when waiting in line goes beyond 1 hour</div></div><div class="price">¥1,500 / hr</div></div>
+      <div class="row"><div><div class="what">Packing</div><div class="note">Per box</div></div><div class="price">¥500</div></div>
+      <div class="row"><div><div class="what">International shipping</div><div class="note">Charged at the post office rate, see below</div></div><div class="price">at cost</div></div>
+      <div class="row"><div><div class="what">Payment processing fee</div><div class="note">Charged by the payment service</div></div><div class="price">at cost</div></div>
+    </div>
+    <p class="small">All prices are in Japanese yen (JPY). When you pay, the payment service shows the amount converted into your own currency.</p>
+    <p class="callout"><strong>Tip:</strong> combining several items, or items from several shops on the same run, into one box saves you the most.</p>
+  </section>
+
+  <section>
+    <h2>Shipping estimates</h2>
+    <p>Small goods (acrylic stands, badges, keychains) usually go by Japan Post <strong>International Air Packet</strong>: up to 2&nbsp;kg, tracked, about 5–21 days.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Weight</th><th>China, Korea, Taiwan</th><th>Other Asia</th><th>Europe, Canada, Oceania, Mexico, Middle East</th><th>Latin America, Africa</th><th>USA</th></tr></thead>
+        <tbody>
+          <tr><td>up to 200 g</td><td>¥820</td><td>¥870</td><td>¥1,060</td><td>¥1,180</td><td class="na" rowspan="4">Not available yet</td></tr>
+          <tr><td>up to 500 g</td><td>¥1,120</td><td>¥1,230</td><td>¥1,600</td><td>¥1,960</td></tr>
+          <tr><td>up to 1 kg</td><td>¥1,620</td><td>¥1,830</td><td>¥2,500</td><td>¥3,260</td></tr>
+          <tr><td>up to 2 kg</td><td>¥2,620</td><td>¥3,030</td><td>¥4,300</td><td>¥5,860</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout warn"><strong>Air Packet has no compensation for loss or damage.</strong> If you want insurance, ask for an insured method instead (more expensive). See the shipping rules below.</p>
+    <p class="small">Rates as of October 2026 and subject to change. Shipments to the USA need import duties prepaid before sending, so US orders will open later.</p>
+  </section>
+
+  <section>
+    <h2>Terms</h2>
+    <p class="small">By sending payment 1 you agree to these terms.</p>
+    <div class="rules">
+      <details open>
+        <summary>If the item is sold out</summary>
+        <ul>
+          <li><strong>Item price is fully refunded.</strong></li>
+          <li><strong>Half of the buying fee is kept,</strong> because the trip to the shop was made.</li>
+          <li>Random or blind items (trading badges, random stands) cannot be chosen. You get what comes out.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>Cancellations</summary>
+        <ul>
+          <li><strong>Until the day before the shopping run:</strong> full refund, minus payment processing fees.</li>
+          <li><strong>After the item is bought:</strong> no cancellation.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>Shipping, loss and damage</summary>
+        <ul>
+          <li>Every parcel is shipped with tracking. I photograph the items, packing and label before sending.</li>
+          <li><strong>Uninsured methods (like Air Packet):</strong> I'm not responsible for loss or damage in transit.</li>
+          <li><strong>Insured methods:</strong> I file the claim with the carrier for you. Compensation comes from the carrier.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>Customs and import duties</summary>
+        <ul>
+          <li><strong>All import duties and fees in your country are paid by you.</strong></li>
+          <li>Please check that your country allows the item. If a parcel is refused or returned, return shipping is paid by you.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>Returns and exchanges</summary>
+        <ul>
+          <li>No returns or exchanges after purchase.</li>
+          <li><strong>If I buy the wrong item, I fix it at my own cost.</strong></li>
+        </ul>
+      </details>
+      <details>
+        <summary>Storage period</summary>
+        <ul>
+          <li>Items are held for <strong>30 days</strong> after payment 2 is requested.</li>
+          <li>If payment 2 is not received by then, the items are disposed of or sold, with no refund.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <h2>What I don't take</h2>
+    <div class="nope">
+      <span>Lottery or raffle sales</span>
+      <span>Over the shop's per-person limit</span>
+      <span>Tickets</span>
+      <span>Unofficial or bootleg goods</span>
+      <span>Items that can't be exported</span>
+      <span>Bulk orders for resale</span>
+    </div>
+    <p class="small">I follow every shop's purchase rules. This service is for fans who want an item for themselves.</p>
+  </section>
+
+  <section class="template">
+    <h2>Request template</h2>
+    <p>Copy this, fill it in and send it by DM to @mahhy_popup on X or Instagram.</p>
+    <pre id="tpl">Item name:
+Photo or link:
+Shop / pop-up name and location:
+Quantity:
+Ship to (country):
+Shipping: Air Packet (no insurance) / insured
+Backup choice if sold out (optional):
+I have read and agree to the terms: yes</pre>
+    <button class="copy" id="copyBtn" type="button">Copy template</button>
+  </section>
+
+  <footer>
+    <p>Requests by DM: <a href="https://x.com/mahhy_popup">X @mahhy_popup</a> · <a href="https://www.instagram.com/mahhy_popup/">Instagram @mahhy_popup</a></p>
+    <p>Payments are handled through a payment service invoice so both sides keep a record.</p>
+  </footer>
+</div>
+
+<script>
+document.getElementById('copyBtn').addEventListener('click', function () {
+  var btn = this, text = document.getElementById('tpl').innerText;
+  function selectIt() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('tpl'));
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = 'Selected, press copy';
+  }
+  try {
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy template'; }, 1800);
+    }, selectIt);
+  } catch (e) { selectIt(); }
+});
+</script>
+</body>
+</html>
